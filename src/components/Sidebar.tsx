@@ -7,7 +7,7 @@ export const Sidebar: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
 
   return (
-    <div className="w-64 bg-black h-full flex-shrink-0 flex flex-col p-6 gap-8 border-r border-zinc-900 z-20">
+    <div className="w-full bg-black h-full flex-shrink-0 flex flex-col p-6 gap-8 border-r border-zinc-900 z-20 overflow-y-auto no-scrollbar pb-32">
       <div className="flex items-center gap-2 text-white font-bold text-xl">
         <Music2 className="text-green-500" size={32} />
         <span>Melodix</span>
@@ -20,17 +20,17 @@ export const Sidebar: React.FC = () => {
       </nav>
 
       <div className="flex flex-col gap-4 mt-4">
-        <button className="flex items-center gap-4 text-zinc-400 hover:text-white transition-colors font-medium">
-          <div className="bg-zinc-400 rounded-sm p-1 text-black">
+        <button className="flex items-center gap-4 text-zinc-400 hover:text-white transition-colors font-medium min-w-0">
+          <div className="bg-zinc-400 rounded-sm p-1 text-black flex-shrink-0">
             <PlusSquare size={20} />
           </div>
-          <span>Create Playlist</span>
+          <span className="truncate">Create Playlist</span>
         </button>
-        <button className="flex items-center gap-4 text-zinc-400 hover:text-white transition-colors font-medium">
-          <div className="bg-gradient-to-br from-indigo-700 to-blue-300 rounded-sm p-1 text-white">
+        <button className="flex items-center gap-4 text-zinc-400 hover:text-white transition-colors font-medium min-w-0">
+          <div className="bg-gradient-to-br from-indigo-700 to-blue-300 rounded-sm p-1 text-white flex-shrink-0">
             <Heart size={20} fill="currentColor" />
           </div>
-          <span>Liked Songs</span>
+          <span className="truncate">Liked Songs</span>
         </button>
       </div>
 
@@ -68,6 +68,6 @@ const NavItem: React.FC<{ to: string; icon: React.ReactNode; label: string }> = 
     }
   >
     {icon}
-    <span>{label}</span>
+    <span className="truncate">{label}</span>
   </NavLink>
 );

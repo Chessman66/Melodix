@@ -52,7 +52,7 @@ export const Home: React.FC = () => {
   return (
     <div className="-mt-8 -mx-8">
       {/* Hero Section */}
-      <section className="relative h-[70vh] w-full overflow-hidden">
+      <section className="relative min-h-[60vh] md:h-[70vh] w-full overflow-hidden flex items-center">
         <div className="absolute inset-0">
           <img 
             src={heroSong.thumbnailUrl} 
@@ -60,33 +60,33 @@ export const Home: React.FC = () => {
             className="w-full h-full object-cover scale-110 blur-sm brightness-50"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-transparent to-transparent" />
         </div>
 
-        <div className="relative h-full flex flex-col justify-center px-12 max-w-4xl">
+        <div className="relative h-full flex flex-col justify-center px-6 md:px-12 max-w-4xl pt-20 pb-32 md:py-0">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <span className="text-green-500 font-bold uppercase tracking-widest text-sm mb-4 block">Featured Track</span>
-            <h1 className="text-6xl md:text-8xl font-black text-white mb-6 leading-tight">
+            <span className="text-green-500 font-bold uppercase tracking-widest text-xs md:text-sm mb-4 block">Featured Track</span>
+            <h1 className="text-4xl md:text-7xl lg:text-8xl font-black text-white mb-4 md:mb-6 leading-tight line-clamp-2">
               {heroSong.title}
             </h1>
-            <p className="text-xl text-zinc-300 mb-8 max-w-2xl leading-relaxed">
+            <p className="text-base md:text-xl text-zinc-300 mb-6 md:mb-8 max-w-2xl leading-relaxed line-clamp-3">
               Experience the latest masterpiece from {heroSong.artist}. Immerse yourself in the soundscapes of Melodix.
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3 md:gap-4">
               <button 
                 onClick={() => playSong(heroSong)}
-                className="bg-white text-black px-8 py-4 rounded-full font-bold flex items-center gap-3 hover:scale-105 transition-transform shadow-xl"
+                className="bg-white text-black px-6 md:px-8 py-3 md:py-4 rounded-full font-bold flex items-center gap-2 md:gap-3 hover:scale-105 transition-transform shadow-xl text-sm md:text-base"
               >
-                <Play fill="black" size={24} />
+                <Play fill="black" size={20} className="md:w-6 md:h-6" />
                 Play Now
               </button>
-              <button className="bg-zinc-500/20 backdrop-blur-md text-white px-8 py-4 rounded-full font-bold flex items-center gap-3 hover:bg-zinc-500/40 transition-colors border border-zinc-700/50">
-                <Info size={24} />
+              <button className="bg-zinc-500/20 backdrop-blur-md text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-bold flex items-center gap-2 md:gap-3 hover:bg-zinc-500/40 transition-colors border border-zinc-700/50 text-sm md:text-base">
+                <Info size={20} className="md:w-6 md:h-6" />
                 More Info
               </button>
             </div>
@@ -95,7 +95,7 @@ export const Home: React.FC = () => {
       </section>
 
       {/* Content Rows */}
-      <div className="px-8 pb-20 space-y-12 -mt-20 relative z-10">
+      <div className="px-4 md:px-8 pb-20 space-y-8 md:space-y-12 -mt-16 md:-mt-20 relative z-10">
         {/* User Uploads Row (if any) */}
         {dbSongs.length > 0 && (
           <SongRow title="Your Uploads" songs={dbSongs} />

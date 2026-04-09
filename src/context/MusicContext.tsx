@@ -22,6 +22,7 @@ interface MusicContextType {
   queue: Song[];
   addToQueue: (song: Song) => void;
   playNext: () => void;
+  stopSong: () => void;
 }
 
 const MusicContext = createContext<MusicContextType | undefined>(undefined);
@@ -70,6 +71,17 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     howl.play();
   };
 
+  const stopSong = () => {
+    if (howlRef.current) {
+      howlRef.current.stop();
+      howlRef.current.unload();
+      howlRef.current = null;
+    }
+    setCurrentSong(null);
+    setIsPlaying(false);
+    setProgress(0);
+  };
+
   const addToQueue = (song: Song) => {
     setQueue(prev => [...prev, song]);
   };
@@ -105,7 +117,7 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [volume]);
 
   return (
-    <MusicContext.Provider value={{ currentSong, isPlaying, playSong, togglePlay, progress, seek, volume, setVolume, queue, addToQueue, playNext }}>
+    <MusicContext.Provider value={{ currentSong, isPlaying, playSong, togglePlay, progress, seek, volume, setVolume, queue, addToQueue, playNext, stopSong }}>
       {children}
     </MusicContext.Provider>
   );
