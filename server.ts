@@ -53,6 +53,8 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true, trim: true },
   email: { type: String, required: true, unique: true, trim: true, lowercase: true },
   password: { type: String, required: true },
+  bio: { type: String, default: '' },
+  avatarUrl: { type: String, default: '' },
   likedSongs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Song' }]
 }, { timestamps: true });
 
@@ -98,15 +100,27 @@ app.post('/api/auth/signup', async (req, res) => {
   try {
     const { username, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
+    let newUser;
 
     if (isMongoConnected) {
-      const user = new User({ username, email, password: hashedPassword });
-      await user.save();
+      newUser = new User({ username, email, password: hashedPassword });
+      await newUser.save();
     } else {
-      const user = { _id: Date.now().toString(), username, email, password: hashedPassword };
-      users.push(user);
+      newUser = { _id: Date.now().toString(), username, email, password: hashedPassword, bio: '', avatarUrl: '' };
+      users.push(newUser);
     }
-    res.status(201).json({ message: 'User created' });
+
+    const token = jwt.sign({ id: newUser._id, username: newUser.username }, process.env.JWT_SECRET || 'secret');
+    res.status(201).json({ 
+      token, 
+      user: { 
+        id: newUser._id, 
+        username: newUser.username, 
+        email: newUser.email,
+        bio: newUser.bio || '',
+        avatarUrl: newUser.avatarUrl || ''
+      } 
+    });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
@@ -128,7 +142,55 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     const token = jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET || 'secret');
-    res.json({ token, user: { id: user._id, username: user.username, email: user.email } });
+    res.json({ token, user: { id: user._id, username: user.username, email: user.email, bio: user.bio, avatarUrl: user.avatarUrl } });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/me', authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    if (isMongoConnected) {
+      const user = await User.findById(userId);
+      if (!user) return res.status(404).json({ error: 'User not found' });
+      res.json({ id: user._id, username: user.username, email: user.email, bio: user.bio, avatarUrl: user.avatarUrl });
+    } else {
+      const user = users.find(u => u._id === userId);
+      if (!user) return res.status(404).json({ error: 'User not found' });
+      res.json({ id: user._id, username: user.username, email: user.email, bio: user.bio || '', avatarUrl: user.avatarUrl || '' });
+    }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/me', authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    const { username, bio, avatarUrl } = req.body;
+
+    if (isMongoConnected) {
+      const user = await User.findById(userId);
+      if (!user) return res.status(404).json({ error: 'User not found' });
+      
+      if (username) user.username = username;
+      if (bio !== undefined) user.bio = bio;
+      if (avatarUrl !== undefined) user.avatarUrl = avatarUrl;
+      
+      await user.save();
+      res.json({ id: user._id, username: user.username, email: user.email, bio: user.bio, avatarUrl: user.avatarUrl });
+    } else {
+      const userIndex = users.findIndex(u => u._id === userId);
+      if (userIndex === -1) return res.status(404).json({ error: 'User not found' });
+      
+      if (username) users[userIndex].username = username;
+      if (bio !== undefined) users[userIndex].bio = bio;
+      if (avatarUrl !== undefined) users[userIndex].avatarUrl = avatarUrl;
+      
+      const user = users[userIndex];
+      res.json({ id: user._id, username: user.username, email: user.email, bio: user.bio, avatarUrl: user.avatarUrl });
+    }
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -224,6 +286,60 @@ app.post('/api/playlists', authenticateToken, async (req: any, res) => {
     res.status(201).json(playlist);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+// Liked Songs
+app.post('/api/songs/:id/like', authenticateToken, async (req: any, res) => {
+  try {
+    const songId = req.params.id;
+    const userId = req.user.id;
+
+    if (isMongoConnected) {
+      const user = await User.findById(userId);
+      if (!user) return res.status(404).json({ error: 'User not found' });
+
+      const index = user.likedSongs.indexOf(songId as any);
+      if (index > -1) {
+        user.likedSongs.splice(index, 1);
+      } else {
+        user.likedSongs.push(songId as any);
+      }
+      await user.save();
+      res.json({ likedSongs: user.likedSongs });
+    } else {
+      const user = users.find(u => u._id === userId);
+      if (!user) return res.status(404).json({ error: 'User not found' });
+
+      if (!user.likedSongs) user.likedSongs = [];
+      const index = user.likedSongs.indexOf(songId);
+      if (index > -1) {
+        user.likedSongs.splice(index, 1);
+      } else {
+        user.likedSongs.push(songId);
+      }
+      res.json({ likedSongs: user.likedSongs });
+    }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/me/liked-songs', authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    if (isMongoConnected) {
+      const user = await User.findById(userId).populate('likedSongs');
+      res.json(user?.likedSongs || []);
+    } else {
+      const user = users.find(u => u._id === userId);
+      if (!user) return res.status(404).json({ error: 'User not found' });
+      const likedIds = user.likedSongs || [];
+      const likedSongs = songs.filter(s => likedIds.includes(s._id));
+      res.json(likedSongs);
+    }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
 });
 

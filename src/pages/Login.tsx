@@ -21,12 +21,8 @@ export const Login: React.FC = () => {
       const payload = isLogin ? { email, password } : { username, email, password };
       const res = await axios.post(endpoint, payload);
       
-      if (isLogin) {
-        login(res.data.token, res.data.user);
-        navigate('/');
-      } else {
-        setIsLogin(true);
-      }
+      login(res.data.token, res.data.user);
+      navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Something went wrong');
     }

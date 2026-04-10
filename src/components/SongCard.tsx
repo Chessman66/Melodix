@@ -1,6 +1,6 @@
 import React from 'react';
 import { useMusic } from '../context/MusicContext';
-import { Play, Plus, ListPlus } from 'lucide-react';
+import { Play, Plus, ListPlus, Heart } from 'lucide-react';
 
 interface Song {
   _id: string;
@@ -12,8 +12,9 @@ interface Song {
 }
 
 export const SongCard: React.FC<{ song: Song }> = ({ song }) => {
-  const { playSong, currentSong, isPlaying, addToQueue } = useMusic();
+  const { playSong, currentSong, isPlaying, addToQueue, likedSongs, toggleLike } = useMusic();
   const isCurrent = currentSong?._id === song._id;
+  const isLiked = likedSongs.includes(song._id);
 
   return (
     <div 
@@ -39,6 +40,13 @@ export const SongCard: React.FC<{ song: Song }> = ({ song }) => {
             className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform"
           >
             <Play fill="black" className="text-black ml-1" size={24} />
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); toggleLike(song._id); }}
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isLiked ? 'bg-green-500/20 text-green-500' : 'bg-zinc-800/80 text-white hover:bg-zinc-700'}`}
+            title={isLiked ? "Unlike" : "Like"}
+          >
+            <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
           </button>
         </div>
       </div>

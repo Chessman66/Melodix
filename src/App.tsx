@@ -7,6 +7,8 @@ import { Home } from './pages/Home';
 import { Search } from './pages/Search';
 import { Login } from './pages/Login';
 import { Library } from './pages/Library';
+import { LikedSongs } from './pages/LikedSongs';
+import { Profile } from './pages/Profile';
 
 export default function App() {
   return (
@@ -19,6 +21,8 @@ export default function App() {
               <Route path="/search" element={<Search />} />
               <Route path="/library" element={<Library />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/liked" element={<LikedSongs />} />
+              <Route path="/profile" element={<Profile />} />
             </Routes>
           </Layout>
         </Router>

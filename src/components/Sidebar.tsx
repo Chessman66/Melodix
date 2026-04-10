@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Search, Library, PlusSquare, Heart, Music2 } from 'lucide-react';
+import { Home, Search, Library, PlusSquare, Heart, Music2, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const Sidebar: React.FC = () => {
@@ -17,6 +17,9 @@ export const Sidebar: React.FC = () => {
         <NavItem to="/" icon={<Home size={24} />} label="Home" />
         <NavItem to="/search" icon={<Search size={24} />} label="Search" />
         <NavItem to="/library" icon={<Library size={24} />} label="Your Library" />
+        {isAuthenticated && (
+          <NavItem to="/profile" icon={<User size={24} />} label="Profile" />
+        )}
       </nav>
 
       <div className="flex flex-col gap-4 mt-4">
@@ -26,12 +29,17 @@ export const Sidebar: React.FC = () => {
           </div>
           <span className="truncate">Create Playlist</span>
         </button>
-        <button className="flex items-center gap-4 text-zinc-400 hover:text-white transition-colors font-medium min-w-0">
+        <NavLink 
+          to="/liked" 
+          className={({ isActive }) => 
+            `flex items-center gap-4 transition-colors font-medium min-w-0 ${isActive ? 'text-white' : 'text-zinc-400 hover:text-white'}`
+          }
+        >
           <div className="bg-gradient-to-br from-indigo-700 to-blue-300 rounded-sm p-1 text-white flex-shrink-0">
             <Heart size={20} fill="currentColor" />
           </div>
           <span className="truncate">Liked Songs</span>
-        </button>
+        </NavLink>
       </div>
 
       <div className="mt-auto pt-6 border-t border-zinc-900">
@@ -44,9 +52,17 @@ export const Sidebar: React.FC = () => {
           </NavLink>
         ) : (
           <div className="flex flex-col gap-4">
-            <div className="text-zinc-500 text-sm">
-              Logged in as <span className="text-white font-bold">{user?.username}</span>
-            </div>
+            <NavLink 
+              to="/profile"
+              className="group flex flex-col gap-1"
+            >
+              <div className="text-zinc-500 text-sm group-hover:text-zinc-400 transition-colors">
+                Logged in as
+              </div>
+              <div className="text-white font-bold group-hover:text-green-500 transition-colors truncate">
+                {user?.username}
+              </div>
+            </NavLink>
             <button 
               onClick={logout}
               className="text-xs text-zinc-500 hover:text-white transition-colors text-left"
